@@ -248,7 +248,7 @@ module SimpleIDN
     raise InvalidDomainName.new if out.empty? && !mapped_domain.empty?
 
     result = if out.size == 1
-      out.prepend(DOT)
+      out.prepend(DOT).join('').encode(domain.encoding)
     else
       out.join(DOT).encode(domain.encoding)
     end
