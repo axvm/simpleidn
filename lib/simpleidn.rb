@@ -226,6 +226,7 @@ module SimpleIDN
     mapped.to_nfc
   end
 
+  class InvalidDomainName < Exception; end
   # Converts a UTF-8 unicode string to a punycode ACE string.
   # == Example
   #   SimpleIDN.to_ascii("møllerriis.com")
@@ -243,11 +244,16 @@ module SimpleIDN
 
       out << (s.codepoints.any? { |cp| cp > ASCII_MAX } ? ACE_PREFIX + Punycode.encode(s) : s)
     end
-
     # If all we had were dots; return "."
-    out = [DOT] if out.empty? && !mapped_domain.empty?
+    raise InvalidDomainName.new if out.empty? && !mapped_domain.empty?
 
-    out.join(DOT).encode(domain.encoding)
+    result = if out.size == 1
+      out.append(DOT)
+    else
+      out.join(DOT).encode(domain.encoding)
+    end
+
+    return result
   end
 
   # Converts a punycode ACE string to a UTF-8 unicode string.
